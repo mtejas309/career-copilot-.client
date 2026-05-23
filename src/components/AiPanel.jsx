@@ -1,0 +1,199 @@
+import { useState, useEffect, useRef } from 'react'
+import { sendMessage, getChatHistory, clearChatHistory } from '../api/chat'
+import { useAuth } from '../context/AuthContext'
+import { Sparkles, Trash2, Send } from 'lucide-react'
+
+function Message({ msg }) {
+  const isUser = msg.role === 'user'
+  return (
+    <div className={`flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      {/* Avatar */}
+      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${
+        isUser ? 'bg-violet-600 text-white' : 'bg-gray-700 text-gray-300'
+      }`}>
+        {isUser ? 'U' : '⚡'}
+      </div>
+
+      {/* Bubble */}
+      <div className={`max-w-[78%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${
+        isUser
+          ? 'bg-violet-600 text-white rounded-tr-sm'
+          : 'bg-gray-800 text-gray-200 rounded-tl-sm'
+      }`}>
+        {msg.content}
+      </div>
+    </div>
+  )
+}
+
+const STARTERS = [
+  'What should I focus on?',
+  'Review my progress',
+  'My skill gaps',
+  'Suggest resources',
+]
+
+export default function AiPanel() {
+  const { user } = useAuth()
+  const [messages, setMessages] = useState([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
+  const bottomRef = useRef()
+  const textareaRef = useRef()
+
+  useEffect(() => {
+    getChatHistory()
+      .then((res) => setMessages(res.data || []))
+      .catch(() => setMessages([]))
+      .finally(() => setHistoryLoaded(true))
+  }, [])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, loading])
+
+  const handleSend = async (text) => {
+    const content = text || input.trim()
+    if (!content || loading) return
+    setInput('')
+
+    setMessages((prev) => [...prev, { role: 'user', content, id: Date.now() }])
+    setLoading(true)
+
+    try {
+      const res = await sendMessage(content)
+      setMessages((prev) => [...prev, res.data])
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Something went wrong. Try again.', id: Date.now() + 1 },
+      ])
+    } finally {
+      setLoading(false)
+      textareaRef.current?.focus()
+    }
+  }
+
+  const handleClear = async () => {
+    await clearChatHistory()
+    setMessages([])
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  const firstName = user?.name?.split(' ')[0] || 'there'
+  const isEmpty = historyLoaded && messages.length === 0
+
+  return (
+    <div className="fixed top-0 right-0 h-screen w-80 bg-gray-900 border-l border-gray-800 flex flex-col z-30">
+
+      {/* Header */}
+      <div className="px-4 py-4 border-b border-gray-800 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-linear-to-br from-violet-500 to-purple-700 rounded-lg flex items-center justify-center">
+            <Sparkles size={14} className="text-white" />
+          </div>
+          <div>
+            <p className="text-white text-sm font-semibold leading-none">AI Mentor</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-green-400 text-xs">Online</span>
+            </div>
+          </div>
+        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="text-gray-600 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-900/20"
+            title="Clear chat"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {!historyLoaded && (
+          <div className="flex justify-center pt-8">
+            <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {isEmpty && (
+          <div className="flex flex-col items-center text-center pt-6">
+            <div className="w-14 h-14 bg-violet-900/40 border border-violet-800 rounded-2xl flex items-center justify-center mb-4">
+              <Sparkles size={22} className="text-violet-400" />
+            </div>
+            <p className="text-white text-sm font-semibold mb-1">Hey {firstName}!</p>
+            <p className="text-gray-500 text-xs leading-relaxed mb-5">
+              I know your goals, skills, and roadmap. Ask me anything.
+            </p>
+            <div className="flex flex-col gap-2 w-full">
+              {STARTERS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSend(s)}
+                  className="text-left text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-violet-700 text-gray-300 hover:text-white px-3 py-2.5 rounded-xl transition-all"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {messages.map((msg, i) => (
+          <Message key={msg.id ?? i} msg={msg} />
+        ))}
+
+        {loading && (
+          <div className="flex gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gray-700 flex items-center justify-center shrink-0 text-xs">⚡</div>
+            <div className="bg-gray-800 px-3 py-2.5 rounded-2xl rounded-tl-sm flex items-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"
+                  style={{ animationDelay: `${i * 150}ms` }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="px-3 py-3 border-t border-gray-800 shrink-0">
+        <div className="flex items-end gap-2 bg-gray-800 border border-gray-700 focus-within:border-violet-500 rounded-xl px-3 py-2 transition-colors">
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask your mentor…"
+            rows={1}
+            className="flex-1 bg-transparent text-white placeholder-gray-500 text-xs resize-none focus:outline-none leading-relaxed"
+            style={{ maxHeight: '80px' }}
+          />
+          <button
+            onClick={() => handleSend()}
+            disabled={!input.trim() || loading}
+            className="w-7 h-7 bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-lg flex items-center justify-center shrink-0 transition-colors mb-0.5"
+          >
+            <Send size={12} />
+          </button>
+        </div>
+        <p className="text-gray-700 text-xs text-center mt-1.5">Enter to send · Shift+Enter new line</p>
+      </div>
+    </div>
+  )
+}
