@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getProfile, updateProfile } from '../api/profile'
 import { useAuth } from '../context/AuthContext'
+import { m as motion } from 'framer-motion'
+import { SkeletonProfileSection } from '../components/Skeleton'
 
 const SKILL_SUGGESTIONS = [
   'JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'TypeScript',
@@ -84,10 +86,18 @@ export default function Profile() {
     }
   }
 
+  const inputClass = "w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+  const cardClass = "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6"
+  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+  const headingClass = "text-gray-900 dark:text-white font-medium"
+
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      <div className="p-8 max-w-2xl space-y-6">
+        <SkeletonProfileSection />
+        <SkeletonProfileSection />
+        <SkeletonProfileSection />
+        <SkeletonProfileSection />
       </div>
     )
   }
@@ -95,46 +105,50 @@ export default function Profile() {
   return (
     <div className="p-8 max-w-2xl">
       <div className="mb-8">
-        <p className="text-gray-400">Your AI mentor uses this to personalize everything. Keep it updated.</p>
+        <p className="text-gray-500 dark:text-gray-400">Your AI mentor uses this to personalize everything. Keep it updated.</p>
       </div>
 
       {error && (
-        <div className="bg-red-950 border border-red-800 text-red-300 text-sm px-4 py-3 rounded-lg mb-6">
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-lg mb-6">
           {error}
         </div>
       )}
       {saved && (
-        <div className="bg-green-950 border border-green-800 text-green-300 text-sm px-4 py-3 rounded-lg mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-300 text-sm px-4 py-3 rounded-lg mb-6"
+        >
           Profile saved successfully ✓
-        </div>
+        </motion.div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
-          <h2 className="text-white font-medium">Basic Info</h2>
+        <div className={`${cardClass} space-y-5`}>
+          <h2 className={headingClass}>Basic Info</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Education</label>
+            <label className={labelClass}>Education</label>
             <input
               type="text"
               name="education"
               value={form.education}
               onChange={handleChange}
               placeholder="e.g. B.Tech Computer Science, MIT"
-              className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+              className={inputClass}
             />
           </div>
         </div>
 
         {/* Skills */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-white font-medium mb-4">Current Skills</h2>
+        <div className={cardClass}>
+          <h2 className={`${headingClass} mb-4`}>Current Skills</h2>
           {form.skills.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {form.skills.map((skill) => (
-                <span key={skill} className="inline-flex items-center gap-1.5 bg-violet-900/50 border border-violet-700 text-violet-200 text-xs px-3 py-1.5 rounded-full">
+                <span key={skill} className="inline-flex items-center gap-1.5 bg-violet-50 dark:bg-violet-900/50 border border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-200 text-xs px-3 py-1.5 rounded-full">
                   {skill}
-                  <button type="button" onClick={() => removeTag('skills', skill)} className="text-violet-400 hover:text-white">×</button>
+                  <button type="button" onClick={() => removeTag('skills', skill)} className="text-violet-400 hover:text-violet-700 dark:hover:text-white">×</button>
                 </span>
               ))}
             </div>
@@ -145,11 +159,11 @@ export default function Profile() {
             onChange={(e) => setSkillInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag('skills', skillInput, setSkillInput) } }}
             placeholder="Type a skill and press Enter"
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+            className={inputClass}
           />
           <div className="mt-3 flex flex-wrap gap-2">
             {SKILL_SUGGESTIONS.filter((s) => !form.skills.includes(s)).slice(0, 8).map((s) => (
-              <button key={s} type="button" onClick={() => addTag('skills', s, setSkillInput)} className="text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded-full transition-colors">
+              <button key={s} type="button" onClick={() => addTag('skills', s, setSkillInput)} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-full transition-colors">
                 + {s}
               </button>
             ))}
@@ -157,14 +171,14 @@ export default function Profile() {
         </div>
 
         {/* Interests */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-          <h2 className="text-white font-medium mb-4">Interests</h2>
+        <div className={cardClass}>
+          <h2 className={`${headingClass} mb-4`}>Interests</h2>
           {form.interests.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {form.interests.map((item) => (
-                <span key={item} className="inline-flex items-center gap-1.5 bg-blue-900/50 border border-blue-700 text-blue-200 text-xs px-3 py-1.5 rounded-full">
+                <span key={item} className="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-200 text-xs px-3 py-1.5 rounded-full">
                   {item}
-                  <button type="button" onClick={() => removeTag('interests', item)} className="text-blue-400 hover:text-white">×</button>
+                  <button type="button" onClick={() => removeTag('interests', item)} className="text-blue-400 hover:text-blue-700 dark:hover:text-white">×</button>
                 </span>
               ))}
             </div>
@@ -175,43 +189,43 @@ export default function Profile() {
             onChange={(e) => setInterestInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag('interests', interestInput, setInterestInput) } }}
             placeholder="e.g. AI, Web Dev, Open Source"
-            className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+            className={inputClass}
           />
         </div>
 
         {/* Career Goals */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-5">
-          <h2 className="text-white font-medium">Career Goals</h2>
+        <div className={`${cardClass} space-y-5`}>
+          <h2 className={headingClass}>Career Goals</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Career Goal</label>
+            <label className={labelClass}>Career Goal</label>
             <input
               type="text"
               name="careerGoal"
               value={form.careerGoal}
               onChange={handleChange}
               placeholder="e.g. Senior Full-Stack Engineer at a product company"
-              className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Salary Goal (₹ / $)</label>
+              <label className={labelClass}>Salary Goal (₹ / $)</label>
               <input
                 type="number"
                 name="salaryGoal"
                 value={form.salaryGoal}
                 onChange={handleChange}
                 placeholder="e.g. 1200000"
-                className="w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Daily Study Hours</label>
+              <label className={labelClass}>Daily Study Hours</label>
               <select
                 name="dailyStudyHours"
                 value={form.dailyStudyHours}
                 onChange={handleChange}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                className={inputClass}
               >
                 <option value="">Select</option>
                 {[0.5, 1, 1.5, 2, 2.5, 3, 4, 5].map((h) => (

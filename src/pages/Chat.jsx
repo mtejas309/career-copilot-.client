@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { sendMessage, getChatHistory, clearChatHistory } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
+import { m as motion, AnimatePresence } from 'framer-motion'
 
 function Message({ msg }) {
   const isUser = msg.role === 'user'
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+    >
       {!isUser && (
         <div className="w-8 h-8 rounded-full bg-violet-700 flex items-center justify-center text-sm mr-3 shrink-0 mt-0.5">
           ⚡
@@ -15,17 +21,17 @@ function Message({ msg }) {
         className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
           isUser
             ? 'bg-violet-600 text-white rounded-br-sm'
-            : 'bg-gray-800 text-gray-200 rounded-bl-sm'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-sm'
         }`}
       >
         {msg.content}
       </div>
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm ml-3 shrink-0 mt-0.5">
+        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm ml-3 shrink-0 mt-0.5">
           👤
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -66,7 +72,6 @@ export default function Chat() {
 
     try {
       const res = await sendMessage(content)
-      // response is the assistant message object: { id, role, content, createdAt }
       setMessages((prev) => [...prev, res.data])
     } catch {
       setMessages((prev) => [
@@ -95,21 +100,21 @@ export default function Chat() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between bg-gray-950">
+      <div className="border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between bg-white dark:bg-gray-950 transition-colors duration-300">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-violet-700 rounded-full flex items-center justify-center">
             <span>⚡</span>
           </div>
           <div>
-            <p className="text-white font-semibold text-sm">AI Career Mentor</p>
-            <p className="text-green-400 text-xs flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block" />
+            <p className="text-gray-900 dark:text-white font-semibold text-sm">AI Career Mentor</p>
+            <p className="text-green-500 dark:text-green-400 text-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse" />
               Online · Remembers your history
             </p>
           </div>
         </div>
         {messages.length > 0 && (
-          <button onClick={handleClear} className="text-xs text-gray-500 hover:text-red-400 transition-colors">
+          <button onClick={handleClear} className="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
             Clear chat
           </button>
         )}
@@ -124,41 +129,50 @@ export default function Chat() {
         )}
 
         {isEmpty && (
-          <div className="flex flex-col items-center justify-center h-full text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center h-full text-center"
+          >
             <div className="text-5xl mb-4">💬</div>
-            <h2 className="text-white font-semibold text-xl mb-2">
+            <h2 className="text-gray-900 dark:text-white font-semibold text-xl mb-2">
               Hey {user?.name?.split(' ')[0] || 'there'}, I&apos;m your AI Career Mentor
             </h2>
-            <p className="text-gray-400 text-sm max-w-sm mb-8">
+            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm mb-8">
               I know your resume, skills, roadmap, and goals. Ask me anything — I remember our conversations.
             </p>
             <div className="flex flex-wrap gap-2 justify-center">
-              {STARTER_PROMPTS.map((p) => (
-                <button
+              {STARTER_PROMPTS.map((p, i) => (
+                <motion.button
                   key={p}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
                   onClick={() => handleSend(p)}
-                  className="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm px-4 py-2 rounded-full border border-gray-700 transition-colors"
+                  className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700 transition-colors"
                 >
                   {p}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {messages.map((msg, i) => (
-          <Message key={msg.id ?? i} msg={msg} />
-        ))}
+        <AnimatePresence>
+          {messages.map((msg, i) => (
+            <Message key={msg.id ?? i} msg={msg} />
+          ))}
+        </AnimatePresence>
 
         {loading && (
           <div className="flex justify-start mb-4">
             <div className="w-8 h-8 rounded-full bg-violet-700 flex items-center justify-center text-sm mr-3 shrink-0">
               ⚡
             </div>
-            <div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-1">
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-1">
+              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -167,7 +181,7 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-800 px-6 py-4 bg-gray-950">
+      <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-white dark:bg-gray-950 transition-colors duration-300">
         <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             value={input}
@@ -175,7 +189,7 @@ export default function Chat() {
             onKeyDown={handleKeyDown}
             placeholder="Ask your career mentor anything…"
             rows={1}
-            className="flex-1 bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-violet-500 transition-colors"
+            className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-violet-500 transition-colors"
             style={{ maxHeight: '120px' }}
           />
           <button
@@ -186,7 +200,7 @@ export default function Chat() {
             <span className="text-lg">→</span>
           </button>
         </div>
-        <p className="text-gray-600 text-xs text-center mt-2">Press Enter to send · Shift+Enter for new line</p>
+        <p className="text-gray-500 dark:text-gray-600 text-xs text-center mt-2">Press Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )

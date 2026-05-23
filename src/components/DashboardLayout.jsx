@@ -12,7 +12,7 @@ function Layout() {
   const showPanel = !HIDE_AI_PANEL.includes(location.pathname)
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-950">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
       <Sidebar />
       <div
         className={`flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 ${
