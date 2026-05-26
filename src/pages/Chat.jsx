@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { sendMessage, getChatHistory, clearChatHistory } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import { m as motion, AnimatePresence } from 'framer-motion'
+import ReactMarkdown from 'react-markdown'
 
 function Message({ msg }) {
   const isUser = msg.role === 'user'
@@ -24,7 +25,28 @@ function Message({ msg }) {
             : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-sm'
         }`}
       >
-        {msg.content}
+        {isUser ? (
+          msg.content
+        ) : (
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+              strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+              ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2">{children}</ol>,
+              li: ({ children }) => <li>{children}</li>,
+              code: ({ inline, children }) =>
+                inline
+                  ? <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
+                  : <pre className="bg-gray-200 dark:bg-gray-700 rounded p-2 text-xs font-mono overflow-x-auto my-2"><code>{children}</code></pre>,
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:opacity-80">{children}</a>
+              ),
+            }}
+          >
+            {msg.content}
+          </ReactMarkdown>
+        )}
       </div>
       {isUser && (
         <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm ml-3 shrink-0 mt-0.5">

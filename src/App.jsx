@@ -17,6 +17,10 @@ const Roadmap        = lazy(() => import('./pages/Roadmap'))
 const Chat           = lazy(() => import('./pages/Chat'))
 const Profile        = lazy(() => import('./pages/Profile'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const JobReadiness   = lazy(() => import('./pages/JobReadiness'))
+const DailyStudyPlan = lazy(() => import('./pages/DailyStudyPlan'))
+const CareerPath     = lazy(() => import('./pages/CareerPath'))
+const MockInterview  = lazy(() => import('./pages/MockInterview'))
 
 function PageFallback() {
   return (
@@ -65,6 +69,10 @@ function AnimatedRoutes() {
           <Route path="roadmap" element={<PageWrapper><Roadmap /></PageWrapper>} />
           <Route path="chat" element={<PageWrapper><Chat /></PageWrapper>} />
           <Route path="profile" element={<PageWrapper><Profile /></PageWrapper>} />
+          <Route path="job-readiness" element={<PageWrapper><JobReadiness /></PageWrapper>} />
+          <Route path="daily-plan"    element={<PageWrapper><DailyStudyPlan /></PageWrapper>} />
+          <Route path="career-path"   element={<PageWrapper><CareerPath /></PageWrapper>} />
+          <Route path="interview"     element={<PageWrapper><MockInterview /></PageWrapper>} />
           <Route
             path="admin"
             element={

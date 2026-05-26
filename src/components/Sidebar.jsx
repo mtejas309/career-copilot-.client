@@ -6,6 +6,7 @@ import LogoutModal from './LogoutModal'
 import {
   LayoutDashboard, FileText, Map, MessageSquare,
   User, LogOut, Zap, ShieldCheck, ChevronLeft, ChevronRight,
+  Target, CalendarDays, TrendingUp, Mic,
 } from 'lucide-react'
 
 const navItems = [
@@ -14,6 +15,13 @@ const navItems = [
   { to: '/dashboard/roadmap', icon: Map,             label: 'Roadmap',         end: false },
   { to: '/dashboard/chat',    icon: MessageSquare,   label: 'AI Mentor',       end: false },
   { to: '/dashboard/profile', icon: User,            label: 'Profile',         end: false },
+]
+
+const agentItems = [
+  { to: '/dashboard/job-readiness', icon: Target,       label: 'Job Readiness',    end: false },
+  { to: '/dashboard/daily-plan',    icon: CalendarDays, label: 'Daily Study Plan', end: false },
+  { to: '/dashboard/career-path',   icon: TrendingUp,   label: 'Career Path',      end: false },
+  { to: '/dashboard/interview',     icon: Mic,          label: 'Mock Interview',   end: false },
 ]
 
 function NavItem({ to, icon: Icon, label, end, collapsed }) {
@@ -90,6 +98,16 @@ const Sidebar = memo(function Sidebar() {
           )}
 
           {navItems.map((item) => (
+            <NavItem key={item.to} {...item} collapsed={collapsed} />
+          ))}
+
+          <div className="my-3 border-t border-gray-200 dark:border-gray-800" />
+          {!collapsed && (
+            <p className="text-gray-500 dark:text-gray-600 text-xs font-medium uppercase tracking-widest px-3 mb-3">
+              AI Agents
+            </p>
+          )}
+          {agentItems.map((item) => (
             <NavItem key={item.to} {...item} collapsed={collapsed} />
           ))}
 
