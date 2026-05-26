@@ -2,9 +2,11 @@ import { useState, useRef } from 'react'
 import { uploadResume } from '../api/resume'
 import { m as motion } from 'framer-motion'
 import Tag from '../components/Tag'
+import ProviderBadge from '../components/ProviderBadge'
 
 export default function ResumeAnalysis() {
   const [analysis, setAnalysis] = useState(null)
+  const [provider, setProvider] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)
@@ -23,6 +25,7 @@ export default function ResumeAnalysis() {
       formData.append('resume', file)
       const res = await uploadResume(formData)
       setAnalysis(res.data.analysisJson)
+      setProvider(res.data.provider || null)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to analyze resume. Please try again.')
     } finally {
@@ -94,10 +97,13 @@ export default function ResumeAnalysis() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Analysis Results</h2>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Analysis Results</h2>
+              <ProviderBadge provider={provider} prefix="via" />
+            </div>
             <button
-              onClick={() => { setAnalysis(null); setError('') }}
+              onClick={() => { setAnalysis(null); setProvider(null); setError('') }}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 px-4 py-2 rounded-lg transition-colors"
             >
               Upload New Resume

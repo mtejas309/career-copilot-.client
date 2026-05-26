@@ -2,6 +2,7 @@ import { m as motion } from 'framer-motion'
 import { getJobReadiness } from '../api/agents'
 import Tag from '../components/Tag'
 import PageHeader from '../components/PageHeader'
+import ProviderBadge from '../components/ProviderBadge'
 import { useAsync } from '../hooks/useAsync'
 
 function CircleProgress({ score }) {
@@ -76,7 +77,10 @@ export default function JobReadiness() {
       >
         <CircleProgress score={data.readinessScore} />
         <div className="flex-1 space-y-3 text-center sm:text-left">
-          <VerdictBadge verdict={data.verdict} />
+          <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+            <VerdictBadge verdict={data.verdict} />
+            <ProviderBadge provider={data.provider} prefix="via" />
+          </div>
           <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{data.summary}</p>
           <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
             <span className="text-xs bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded-full">

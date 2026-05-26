@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { m as motion, AnimatePresence } from 'framer-motion'
 import { startInterview, evaluateAnswer, getInterviewSummary } from '../api/agents'
 import Tag from '../components/Tag'
+import ProviderBadge from '../components/ProviderBadge'
 
 function TypeBadge({ type }) {
   const map = {
@@ -154,9 +155,10 @@ function QuestionScreen({ session, qIndex, onNext, onFinish }) {
         >
           {/* Score */}
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
               <span className="text-3xl font-bold text-white">{evaluation.score}<span className="text-lg text-gray-400">/10</span></span>
               <GradeBadge score={evaluation.score} />
+              <ProviderBadge provider={evaluation.provider} prefix="via" />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">{evaluation.feedback}</p>
           </div>
@@ -231,8 +233,9 @@ function SummaryScreen({ summary, onRetake }) {
       >
         <p className="text-gray-400 text-sm mb-2">Overall Score</p>
         <p className="text-6xl font-bold text-white mb-1">{summary.overallScore}<span className="text-2xl text-gray-400">/10</span></p>
-        <div className="flex justify-center mt-3">
+        <div className="flex justify-center items-center gap-2 mt-3 flex-wrap">
           <Tag label={summary.readyToInterview ? 'Ready to Interview ✓' : 'More Practice Needed'} colorClass={readyColor} />
+          <ProviderBadge provider={summary.provider} prefix="via" />
         </div>
         <p className="text-gray-400 text-sm mt-4 leading-relaxed">{summary.summary}</p>
       </motion.div>

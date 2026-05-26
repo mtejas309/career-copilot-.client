@@ -1,6 +1,7 @@
 import { m as motion } from 'framer-motion'
 import { getDailyPlan } from '../api/agents'
 import PageHeader from '../components/PageHeader'
+import ProviderBadge from '../components/ProviderBadge'
 import { useAsync } from '../hooks/useAsync'
 
 const typeStyles = {
@@ -92,6 +93,7 @@ export default function DailyStudyPlan() {
           <span className="text-xs bg-violet-900/40 border border-violet-700 text-violet-300 px-3 py-1 rounded-full">
             {data.totalHours}h total
           </span>
+          <ProviderBadge provider={data.provider} prefix="via" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-3">{data.greeting}</h2>
       </motion.div>

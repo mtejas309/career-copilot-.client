@@ -2,6 +2,7 @@ import { m as motion } from 'framer-motion'
 import { getCareerPath } from '../api/agents'
 import Tag from '../components/Tag'
 import PageHeader from '../components/PageHeader'
+import ProviderBadge from '../components/ProviderBadge'
 import { useAsync } from '../hooks/useAsync'
 
 function MatchBar({ pct }) {
@@ -121,6 +122,7 @@ export default function CareerPath() {
         <span className="text-xs bg-violet-900/40 border border-violet-700 text-violet-200 px-3 py-1.5 rounded-full font-medium">
           Target: <span className="text-white">{data.targetRole}</span>
         </span>
+        <ProviderBadge provider={data.provider} prefix="via" />
       </motion.div>
 
       {/* 3 columns */}
